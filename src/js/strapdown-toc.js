@@ -18,7 +18,7 @@
 
     buildTocItem: function  (hash, title) {
       // The <li> is to be closed when all his children have been added.
-      return '<li><a href="#' + hash + '">' + title + '</a>';
+      return '<li><a href="" onclick="$(\'#' + hash + '\').scrollView(); return false;" target="_self">' + title + '</a>';
     },
 
     generateClosingTags: function (previousLevel, currentLevel) {
@@ -34,7 +34,7 @@
     },
 
     makeToc: function  (contentEl, settings) {
-      var headerLevels = 'h1,h2,h3',
+      var headerLevels = 'h1,h2,h3,h4,h5',
           tocString = '',
           prevLevel
           ;
@@ -62,19 +62,18 @@
 
       if (settings.toc.topLink) {
         var label = settings.toc.topLink;
-        tocString += '<li><a href="#" id="backTop" onlick="' +
-                     'jQuery(\'html,body\').animate({scrollTop:0},0);' +
-                     '" >' + label + '</a></li>';
+//        tocString += '<li><a href="" id="backTop" onlick="' +
+//                     '$(\'html,body\').animate({scrollTop:0},0); return false;' +
+//                     '"  target="_self">' + label + '</a></li>';
       }
 
       return tocString;
     }
   };
 
-  $.fn.strapdown.toc = function (contentEl, settings) {
-    var navbarTocEl = $(settings.toc.dest);
-
+  $.fn.toc = function (contentEl, settings) {
     if (settings && settings.toc && !settings.toc.disabled) {
+      var navbarTocEl = $(settings.toc.dest);
 
       if (!contentEl.length) {
         console.warn('No content available to generate the table of content from. Aborting.');
@@ -87,6 +86,19 @@
           'class': settings.toc.scrollspy ? 'nav navbar-nav' : '',
           'html': _.makeToc(contentEl, settings)
         }));
+        
+        // do show only if not hide
+        if (! settings.toc.hide) {
+            // check for minDeep
+            $(navbarTocEl).each(function () {
+                var filter = "#" + this.id + " li";
+                if ($(filter).length > (settings.toc.minDeep || 0)) {
+                    $(this).css("display", "block");
+                } else {
+                    $(this).css("display", "none");
+                }
+            });
+        }
 
         if (settings.toc.scrollspy) {
           if ($.fn.scrollspy) {
@@ -106,8 +118,12 @@
     return this;
   };
 
-  // @ifdef DEBUG
-  $.fn.strapdown.toc._internals = _;   // For testing purposes
-  // @endif
-
+  $.fn.scrollView = function () {
+        return this.each(function () {
+            $('html, body').animate({
+                scrollTop: $(this).offset().top
+            }, 1000);
+        });
+  };
+  
 }( jQuery ));
