@@ -135,6 +135,7 @@
   
   function hasScroll(el, index, match) {
       var $el = $(el),
+              sG = $el.css('overflow'),
               sX = $el.css('overflow-x'),
               sY = $el.css('overflow-y'),
               hidden = 'hidden', // minifiers would like this better
@@ -148,12 +149,23 @@
               return false;
           }
           if (sX === scroll || sY === scroll) { return true; }
+          if (sG === hidden || sG === visible) {
+              return false;
+          }
       } else if (axis === 'x') { // don't mix ifs and switches on the same variable
+          if ($el[0].style.width === 'auto') { return false }
           if (sX === hidden || sX === visible) { return false; }
           if (sX === scroll) { return true; }
+          if (sG === hidden || sG === visible) {
+              return false;
+          }
       } else if (axis === 'y') {
+          if ($el[0].style.height === 'auto') { return false }
           if (sY === hidden || sY === visible) { return false; }
           if (sY === scroll) { return true };
+          if (sG === hidden || sG === visible) {
+              return false;
+          }
       }
 
       //Compare client and scroll dimensions to see if a scrollbar is needed
@@ -176,6 +188,7 @@
           if (!$parent) {
               $parent = $('html, body');
           }
+          console.log('scrollView use:', $parent);
           $parent.animate({
               scrollTop: $(this).offset().top
           }, 1000);
