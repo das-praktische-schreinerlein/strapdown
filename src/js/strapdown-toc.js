@@ -135,13 +135,13 @@
   
   function hasScroll(el, index, match) {
       var $el = $(el),
-              sG = $el.css('overflow'),
-              sX = $el.css('overflow-x'),
-              sY = $el.css('overflow-y'),
-              hidden = 'hidden', // minifiers would like this better
-              visible = 'visible',
-              scroll = 'scroll',
-              axis = match[3]; // regex for filter -> 3 == args to selector
+          sG = $el.css('overflow'),
+          sX = $el.css('overflow-x'),
+          sY = $el.css('overflow-y'),
+          hidden = 'hidden', // minifiers would like this better
+          visible = 'visible',
+          scroll = 'scroll',
+          axis = match[3]; // regex for filter -> 3 == args to selector
 
       if (!axis) { // better check than undefined
           //Check both x and y declarations
@@ -153,44 +153,50 @@
               return false;
           }
       } else if (axis === 'x') { // don't mix ifs and switches on the same variable
-          if ($el[0].style.width === 'auto') { return false }
+          if ($el[0].style.width === 'auto') { return false; }
           if (sX === hidden || sX === visible) { return false; }
           if (sX === scroll) { return true; }
           if (sG === hidden || sG === visible) {
               return false;
           }
+          return $el.innerWidth() < el.scrollWidth;
       } else if (axis === 'y') {
-          if ($el[0].style.height === 'auto') { return false }
+          if ($el[0].style.height === 'auto') { return false ; }
           if (sY === hidden || sY === visible) { return false; }
-          if (sY === scroll) { return true };
+          if (sY === scroll) { return true ;}
           if (sG === hidden || sG === visible) {
               return false;
           }
+          return $el.innerHeight() < el.scrollHeight;
       }
 
       //Compare client and scroll dimensions to see if a scrollbar is needed
-
       return $el.innerHeight() < el.scrollHeight || //make use of potential short circuit
-              $el.innerWidth() < el.scrollWidth; //innerHeight is the one you want
+          $el.innerWidth() < el.scrollWidth; //innerHeight is the one you want
   }
   $.expr[':'].hasScrollBar = hasScroll;
 
   $.fn.scrollView = function () {
-    return this.each(function () {
+      console.log('scrollView for:', this);
+      return this.each(function (idx, that) {
           // use the first scrollable element
           var $parent;
-          $(this).parents(':hasScrollBar(y)').each(function (idx, ele) {
+          $(that).parents(':hasScrollBar(y)').each(function (idx2, ele) {
               if ($parent) {
                   return;
               }
-              $parent = $(ele).first();
+              if ($(ele)[0].tagName === 'BODY') {
+                  // body has problems on ng-page
+                  return;
+              }
+              $parent = $(ele);
           });
           if (!$parent) {
               $parent = $('html, body');
           }
           console.log('scrollView use:', $parent);
           $parent.animate({
-              scrollTop: $(this).offset().top
+              scrollTop: $(that).offset().top
           }, 1000);
       });
   };
